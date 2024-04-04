@@ -72,6 +72,7 @@ abstract class MenuOption {
 }
 
 class RentApartment extends MenuOption {
+    private static String username; // store username??
 
     @Override
      void performAction(String[] apartments, double[] prices, int[] availableRooms, int[] rentedRooms, String[] rentalDates) {
@@ -93,14 +94,14 @@ class RentApartment extends MenuOption {
                 JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
         if (result == JOptionPane.OK_OPTION) {
-            String username = usernameField.getText();
+            username = usernameField.getText();
                 if (username == null || username.trim().isEmpty()){
                     JOptionPane.showMessageDialog(null, "Please enter your name!", "Alert", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
             String email = emailField.getText();
                 if (!isValidEmail(email)){
-                    JOptionPane.showMessageDialog(null, "please enter a valid email");
+                    JOptionPane.showMessageDialog(null, "Please enter a valid email!");
                     return;
                 }
             int apartmentIndex = apartmentComboBox.getSelectedIndex();
@@ -130,6 +131,9 @@ class RentApartment extends MenuOption {
         String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
         return email.matches(emailRegex);
         }
+        static String getUsername(){
+            return username;
+    }
 }
 
 
@@ -139,6 +143,7 @@ class RoomDetails extends MenuOption {
     void performAction(String[] apartments, double[] prices, int[] availableRooms, int[] rentedRooms, String[] rentalDates) {
         String[] options = {"Normal", "VIP", "Deluxe"};
         String[] descriptions = {
+                "Price: Rp. 1.200.000\n"+
                 "Facilities:\n" +
                 "- Normal size bed\n" +
                 "- TV\n" +
@@ -147,7 +152,8 @@ class RoomDetails extends MenuOption {
                 "- Kitchen Set\n" +
                 "- Air-Conditioner\n" +
                 "- Electric Hob",
-
+                
+                "Price: Rp. 2.000.000\n" +
                 "Facilities:\n" +
                 "- Queen size bed\n" +
                 "- TV\n" +
@@ -158,6 +164,7 @@ class RoomDetails extends MenuOption {
                 "- Baby cot\n" +
                 "- Electric Hob",
 
+                "Price: Rp. 2.800.000\n" + 
                 "Facilities:\n" +
                 "- King size bed\n" +
                 "- TV\n" +
@@ -184,7 +191,7 @@ class RoomDetails extends MenuOption {
         panel.add(comboBox);
         panel.add(descriptionArea);
         
-        panel.setPreferredSize(new java.awt.Dimension(100,150));
+        panel.setPreferredSize(new java.awt.Dimension(110,200));
 
         JOptionPane.showMessageDialog(null, panel,"Room Facilities", JOptionPane.PLAIN_MESSAGE);
     }
@@ -220,7 +227,8 @@ class DisplayPaymentSchedule extends MenuOption {
 
         DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
         Calendar calendar = Calendar.getInstance();
-        String paymentSchedule = "Payment Schedule:\n";
+        String paymentSchedule = "Payment Schedule for:\n"
+                + "Name: " + RentApartment.getUsername()+ "\n";
 
         for (int i = 0; i < apartments.length; i++) {
             if (rentedRooms[i] > 0) {
@@ -229,7 +237,7 @@ class DisplayPaymentSchedule extends MenuOption {
                         calendar.setTime(dateFormat.parse(rentalDates[i]));
                         calendar.add(Calendar.MONTH, j);
                         Date nextPaymentDate = calendar.getTime();
-                        paymentSchedule += apartments[i] + ": Rp. " + prices[i] + " due on " + dateFormat.format(nextPaymentDate) + "\n";
+                        paymentSchedule +="Type: " + apartments[i] + "\n" + "Price: Rp. " + prices[i] + "\n" + "Due on " + dateFormat.format(nextPaymentDate) + "\n";
 
                         calendar.setTime(dateFormat.parse(rentalDates[i]));
                         calendar.add(Calendar.MONTH, j + 1);
