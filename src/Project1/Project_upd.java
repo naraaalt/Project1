@@ -65,77 +65,110 @@ public class Project_upd {
     }
 }
 
-
-
 abstract class MenuOption {
     abstract void performAction(String[] apartments, double[] prices, int[] availableRooms, int[] rentedRooms, String[] rentalDates);
 }
 
 class RentApartment extends MenuOption {
-    private static String username; // store username??
+    private static String name, rentDate; // store username??
 
     @Override
      void performAction(String[] apartments, double[] prices, int[] availableRooms, int[] rentedRooms, String[] rentalDates) {
         JPanel panel = new JPanel();
-        JTextField usernameField = new JTextField(10);
-        JTextField emailField = new JTextField(10);
-        JComboBox<String> apartmentComboBox = new JComboBox<>(apartments);
-
-        panel.add(new JLabel("Username:"));
-        panel.add(usernameField);
-        panel.add(Box.createHorizontalStrut(15));
-        panel.add(new JLabel("Email:"));
-        panel.add(emailField);
-        panel.add(Box.createHorizontalStrut(15));
-        panel.add(new JLabel("Select an apartment:"));
-        panel.add(apartmentComboBox);
-
-        int result = JOptionPane.showConfirmDialog(null, panel, "Rent Apartment",
-                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-
-        if (result == JOptionPane.OK_OPTION) {
-            username = usernameField.getText();
-                if (username == null || username.trim().isEmpty()){
-                    JOptionPane.showMessageDialog(null, "Please enter your name!", "Alert", JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
-            String email = emailField.getText();
-                if (!isValidEmail(email)){
-                    JOptionPane.showMessageDialog(null, "Please enter a valid email!");
-                    return;
-                }
-            int apartmentIndex = apartmentComboBox.getSelectedIndex();
- 
-                
-            if (apartmentIndex >= 0 && apartmentIndex < apartments.length) {
-                if (availableRooms[apartmentIndex] > 0) {
-                    DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
-                    Date currentDate = new Date();
-                    rentalDates[apartmentIndex] = dateFormat.format(currentDate);
-                    JOptionPane.showMessageDialog(null, "Hello " + username + "! You've rented " + apartments[apartmentIndex] + " for Rp." + prices[apartmentIndex] + ". Your rent starts from: " + rentalDates[apartmentIndex]);
-                    availableRooms[apartmentIndex]--;
-                    rentedRooms[apartmentIndex]++;
-                } else {
-                    JOptionPane.showMessageDialog(null, "Sorry, no rooms available in this apartment.");
-                }
-            } else {
-                JOptionPane.showMessageDialog(null, "Invalid apartment selection.");
-            }
-        } else {
-            JOptionPane.showMessageDialog(null, "Renting Cancelled.", "Alert", JOptionPane.INFORMATION_MESSAGE);
-        }
-     
-     }
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         
-        private boolean isValidEmail(String email) {
-        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
-        return email.matches(emailRegex);
+        JTextField nameField = new JTextField(10);
+        JTextField emailField = new JTextField(10);
+        JTextField dateField = new JTextField(20);
+        JComboBox<String> apartComboBox =  new JComboBox<>(apartments);
+        
+        // Name textbox
+        JPanel namePanel = new JPanel();
+        namePanel.add(new JLabel("Name:"));
+        namePanel.add(nameField);
+        panel.add(namePanel);
+        
+        // Email textbox
+        JPanel emailPanel = new JPanel();
+        emailPanel.add(new JLabel("Email:"));
+        emailPanel.add(emailField);
+        panel.add(emailPanel);
+        
+        // Date textbox
+        JPanel datePanel = new JPanel();
+        datePanel.add (new JLabel("Rent Date (dd-mm-yyyy: )"));
+        datePanel.add (dateField);
+        panel.add(datePanel);
+        
+        // Apartment list
+        JPanel apartPanel = new JPanel();
+        apartPanel.add (new JLabel("Select an Apartment:"));
+        apartPanel.add(apartComboBox);
+        panel.add(apartPanel);
+        
+        int result = JOptionPane.showConfirmDialog(null, panel, "Rent Apartment", 
+                + JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        
+        if (result == JOptionPane.OK_OPTION){
+            name = nameField.getText();
+            if (name == null || name.trim().isEmpty()){
+                JOptionPane.showMessageDialog(null, "Please enter your name!", "Alert",  JOptionPane.ERROR_MESSAGE);
+                    return;
+            }
+            
+            String email = emailField.getText();
+            if (!emailValid(email)){
+                JOptionPane.showMessageDialog(null, "Please enter a valid Email!", "Alert", JOptionPane.ERROR_MESSAGE);
+                    return;
+            }
+            
+            rentDate = dateField.getText();
+            
+            if (!validDate(rentDate)){
+                JOptionPane.showConfirmDialog(null, "Please enter a valid date.");
+                return;
+            }
+            
+            int apartIndex = apartComboBox.getSelectedIndex();
+            
+            if (apartIndex >= 0 && apartIndex < apartments.length){
+                if (availableRooms[apartIndex] > 0){
+                    rentalDates[apartIndex] = rentDate;
+                    JOptionPane.showMessageDialog(null, "Hello " + name + "! You have rented " + apartments[apartIndex] + "for Rp. " + prices[apartIndex] + ". Your rent starts from: " + rentalDates[apartIndex]);
+                    availableRooms[apartIndex]--;
+                    rentedRooms[apartIndex]++;
+                }else {
+                    JOptionPane.showMessageDialog(null, "Sorry no rooms are available currently.");
+                }
+            }else {
+                JOptionPane.showMessageDialog(null, "Invalid apartment selection");
+            }
+        }else {
+            JOptionPane.showMessageDialog(null, "Renting cancelled.", "Alert", JOptionPane.ERROR_MESSAGE);
         }
-        static String getUsername(){
-            return username;
-    }
+   }
+     
+     private boolean emailValid(String email){
+         String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+         return email.matches(emailRegex);
+     }
+     
+     private boolean validDate (String date){
+         try{
+             SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+             dateFormat.setLenient(false);
+             dateFormat.parse(date);
+             return true;
+         }catch(ParseException e){   
+             return false;
+         }
+        
+     }
+     
+     static String getName(){
+         return name;
+     }
 }
-
 
 class RoomDetails extends MenuOption {
 
@@ -228,7 +261,7 @@ class DisplayPaymentSchedule extends MenuOption {
         DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
         Calendar calendar = Calendar.getInstance();
         String paymentSchedule = "Payment Schedule for:\n"
-                + "Name: " + RentApartment.getUsername()+ "\n";
+                + "Name: " + RentApartment.getName()+ "\n";
 
         for (int i = 0; i < apartments.length; i++) {
             if (rentedRooms[i] > 0) {
